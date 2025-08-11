@@ -1,0 +1,27 @@
+<!-- templates/index.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>SmartQRPrint — Upload & Pay</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; background:#f7f9fc; color:#222 }
+    .container { max-width:600px; margin:0 auto; background:white; padding:20px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.08); }
+    input[type=file] { display:block; margin:20px 0 }
+    .btn { background:#0b67ff; color:white; padding:10px 16px; border:none; border-radius:6px; cursor:pointer }
+    .note { color:#555; font-size:0.9em }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>SmartQRPrint — Upload & Pay</h2>
+    <p class="note">Connect to this device's Wi-Fi, upload a PDF or image, and get a QR code after payment.</p>
+    <form method="post" enctype="multipart/form-data">
+      <input type="file" name="file" required>
+      <button class="btn" type="submit">Upload</button>
+    </form>
+    <hr>
+    <p class="note">Admin? <a href="/admin">View Jobs</a></p>
+  </div>
+</body>
+</html>

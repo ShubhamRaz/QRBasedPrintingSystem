@@ -1,0 +1,32 @@
+<!-- templates/admin.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>SmartQRPrint — Admin</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin:20px; background:#fafafa }
+    table { border-collapse: collapse; width:100% }
+    th, td { padding:8px 10px; border:1px solid #ddd }
+    th { background:#f0f0f0 }
+    .ok { color:green } .no { color:red }
+  </style>
+</head>
+<body>
+  <h2>Jobs</h2>
+  <table>
+    <tr><th>ID</th><th>Token</th><th>File</th><th>Uploaded</th><th>Paid</th><th>Printed</th><th>Expires</th></tr>
+    {% for job in jobs %}
+    <tr>
+      <td>{{ job.id }}</td>
+      <td>{{ job.token }}</td>
+      <td>{{ job.filename }}</td>
+      <td>{{ job.uploaded_at }}</td>
+      <td>{% if job.paid %}<span class="ok">Yes{% else %}<span class="no">No{% endif %}</span></td>
+      <td>{% if job.printed %}<span class="ok">Yes{% else %}<span class="no">No{% endif %}</span></td>
+      <td>{{ job.expires_at }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</body>
+</html>
