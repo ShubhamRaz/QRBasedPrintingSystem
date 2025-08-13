@@ -39,14 +39,14 @@ def fetch_job_and_print(token):
     except subprocess.CalledProcessError as e:
         print("Print failed:", e)
         return False
-
+last_seen = None
+last_seen_time = 0
 def scan_loop():
     print("Starting camera scan on device", CAMERA_DEVICE_INDEX)
     cap = cv2.VideoCapture(CAMERA_DEVICE_INDEX)
     if not cap.isOpened():
         print("Cannot open camera. Check camera index or permissions.")
         return
-    last_seen = None
     cooldown = 3  # seconds between processing same token
     while True:
         ret, frame = cap.read()
@@ -57,7 +57,8 @@ def scan_loop():
         for b in barcodes:
             token = b.data.decode('utf-8').strip()
             now = time.time()
-            if token == last_seen and (now - last_seen_time) < cooldown:
+            global last_seen, last_seen_time
+            if last_seen is not None and token == last_seen and (now - last_seen_time) < cooldown:
                 continue
             print("Detected token:", token)
             ok = fetch_job_and_print(token)
@@ -66,7 +67,6 @@ def scan_loop():
                 last_seen_time = now
             else:
                 print("Job not printed (reason logged)")
-        # small delay
         time.sleep(0.1)
 
 if __name__ == '__main__':
