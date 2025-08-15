@@ -49,41 +49,73 @@ def create_job_entry(filename, filepath):
     conn.commit()
     conn.close()
     return token
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
+        # Basic validation
         if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
+            app.logger.error("No file part in request.files")
+            return jsonify({"error": "no_file_part"}), 400
+
         f = request.files['file']
         if f.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if f and allowed_file(f.filename):
+            app.logger.error("Empty filename")
+            return jsonify({"error": "no_selected_file"}), 400
+
+        if not allowed_file(f.filename):
+            app.logger.error("File type not allowed: %s", f.filename)
+            return jsonify({"error": "invalid_file_type", "filename": f.filename}), 400
+
+        # Save file
+        try:
             filename = secure_filename(f.filename)
             ts = int(time.time())
             stored_name = f"{ts}_{secrets.token_hex(8)}_{filename}"
+            # ensure upload folder exists (redundant but safe)
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
             path = os.path.join(UPLOAD_FOLDER, stored_name)
             f.save(path)
-            token = create_job_entry(filename, path)
-            # If SIMULATE_PAYMENT: mark paid immediately (for testing)
-            if SIMULATE_PAYMENT:
-                mark_paid(token)
-            # Generate QR linking to token
-            qr = qrcode.QRCode(box_size=6, border=2)
-            qr.add_data(token)
-            qr.make(fit=True)
-            img = qr.make_image(fill_color="black", back_color="white")
-            buf = BytesIO()
-            img.save(buf, format='PNG')
-            buf.seek(0)
-            return send_file(buf, mimetype='image/png', as_attachment=False, download_name=f"{token}.png")
-        else:
-            flash('Invalid file type')
-            return redirect(request.url)
-    return render_template('index.html')
+            app.logger.info("Saved upload to %s", path)
+        except Exception as e:
+            app.logger.exception("Failed to save file")
+            return jsonify({"error": "save_failed", "detail": str(e)}), 500
 
+        # Create DB entry
+        try:
+            token = create_job_entry(filename, path)
+            app.logger.info("Created DB job with token %s", token)
+        except Exception as e:
+            app.logger.exception("Failed to insert DB row")
+            # try to remove the saved file to avoid orphan files
+            try:
+                os.remove(path)
+            except Exception:
+                pass
+            return jsonify({"error": "db_insert_failed", "detail": str(e)}), 500
+
+        # Simulate or require payment
+        if SIMULATE_PAYMENT:
+            try:
+                mark_paid(token)
+                app.logger.info("Auto-marked token %s as paid (SIMULATE_PAYMENT)", token)
+            except Exception:
+                app.logger.exception("Failed to mark paid")
+
+        # return QR image as binary plus token for debug
+        qr = qrcode.QRCode(box_size=6, border=2)
+        qr.add_data(token)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+        buf = BytesIO()
+        img.save(buf, format='PNG')
+        buf.seek(0)
+        resp = send_file(buf, mimetype='image/png', as_attachment=False, download_name=f"{token}.png")
+        # include token in header for easy debugging
+        resp.headers['X-Job-Token'] = token
+        return resp
+
+    # GET => return current upload form
+    return render_template('index.html')
 def mark_paid(token):
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()

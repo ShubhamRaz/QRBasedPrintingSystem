@@ -3,6 +3,10 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+#uploaded / printed files
+printed/
+uploads/
+
 # C extensions
 *.so
 
