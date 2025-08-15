@@ -1,39 +1,192 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Admin Login - SmartQRPrint</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Login — SmartQRPrint</title>
   <style>
-    body{font-family:Arial,Helvetica,sans-serif;background:#f6f8fb;margin:0;padding:20px}
-    .card{max-width:420px;margin:60px auto;background:#fff;padding:20px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
-    input{width:100%;padding:10px;margin:8px 0;border-radius:6px;border:1px solid #ddd}
-    button{background:#0b67ff;color:#fff;border:none;padding:10px 14px;border-radius:6px;cursor:pointer}
-    .flash{color:red}
-    .links{margin-top:10px}
-    .links a{margin-right:10px;color:#0b67ff;text-decoration:none}
+    :root {
+      --bg: linear-gradient(135deg, #dbeafe, #f5f7fa);
+      --card: #ffffff;
+      --muted: #64707a;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --danger: #e03e3e;
+      --radius: 12px;
+      --pad: 24px;
+      --gap: 14px;
+      --font: 'Segoe UI', Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: #0b1a2b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .card {
+      position: relative;
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: var(--pad);
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .home-btn {
+      position: absolute;
+      top: var(--pad);
+      left: var(--pad);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 6px 10px;
+      border: 1px solid #e6e9ef;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .home-btn:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .home-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    p.lead {
+      font-size: 0.95rem;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .flash {
+      background: #ffecec;
+      color: var(--danger);
+      border: 1px solid rgba(224,62,62,0.12);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+
+    form {
+      display: grid;
+      gap: var(--gap);
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #e6e9ef;
+      border-radius: 8px;
+      background: #f9fafb;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+    }
+
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .links {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: var(--gap);
+      gap: 16px;
+    }
+
+    .link {
+      color: var(--accent);
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .link:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
   <div class="card">
-    <h2>Admin Login</h2>
+    <a href="{{ url_for('index') }}" class="home-btn">
+      <svg fill="currentColor" viewBox="0 0 20 20">
+        <path d="M10 2l8 8h-3v8H5v-8H2l8-8z"/>
+      </svg>
+      Home
+    </a>
+
+    <h1>Admin Login</h1>
+    <p class="lead">Sign in to access administrative tools.</p>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-        <ul>
         {% for cat, msg in messages %}
-          <li class="flash">{{ msg }}</li>
+          <div class="flash">{{ msg }}</div>
         {% endfor %}
-        </ul>
       {% endif %}
     {% endwith %}
+
     <form method="post" action="{{ url_for('admin_login') }}">
-      <input type="hidden" name="next" value="{{ request.args.get('next','') }}">
-      <input type="text" name="username" placeholder="Admin username" required autofocus>
-      <input type="password" name="password" placeholder="Password" required>
-      <button type="submit">Log in</button>
+      <input type="hidden" name="next" value="{{ request.args.get('next','') }}" />
+      <input type="text" name="username" placeholder="Admin username" required autofocus />
+      <input type="password" name="password" placeholder="Password" required />
+      <button class="btn" type="submit">Log in</button>
     </form>
+
     <div class="links">
-      <a href="{{ url_for('user_login') }}">User login</a>
+      <a href="{{ url_for('user_login') }}" class="link">User login</a>
     </div>
   </div>
 </body>

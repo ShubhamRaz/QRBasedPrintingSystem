@@ -5,22 +5,96 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>My Jobs - SmartQRPrint</title>
   <style>
-    body{font-family:Arial,Helvetica,sans-serif;background:#f7f9fc;margin:20px}
-    table{width:100%;border-collapse:collapse;background:#fff}
-    th,td{padding:10px;border:1px solid #ddd;text-align:left}
-    th{background:#f0f0f0}
-    .ok{color:green}.no{color:red}
-    .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-    .btn-qr{padding:5px 10px;background:#0b67ff;color:#fff;text-decoration:none;border-radius:5px;font-size:14px}
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f5f7fa;
+      margin: 20px;
+      color: #0b1a2b;
+    }
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    h2 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+    .btn-link {
+      display: inline-block;
+      padding: 6px 12px;
+      background: #3b82f6;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+    .btn-link:hover {
+      background: #2563eb;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+      font-size: 0.95rem;
+    }
+    th {
+      background: #f0f2f5;
+      font-weight: 600;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .ok {
+      color: #16a34a;
+      font-weight: 600;
+    }
+    .no {
+      color: #dc2626;
+      font-weight: 600;
+    }
+    .btn-qr {
+      display: inline-block;
+      padding: 6px 12px;
+      background: #3b82f6;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .btn-qr:hover {
+      background: #2563eb;
+    }
   </style>
 </head>
 <body>
   <div class="top">
     <h2>My Jobs</h2>
-    <div>
-      Logged in as <strong>{{ session.user }}</strong> |
-      <a href="{{ url_for('logout') }}">Logout</a> |
-      <a href="{{ url_for('index') }}">Upload</a>
+    <div class="top-actions">
+      <span>Logged in as <strong>{{ session.user }}</strong></span>
+      <a href="{{ url_for('index') }}" class="btn-link">🏠 Home</a>
+      <a href="{{ url_for('index') }}" class="btn-link">⬆ Upload</a>
+      <a href="{{ url_for('logout') }}" class="btn-link">🚪 Logout</a>
     </div>
   </div>
 
@@ -48,7 +122,6 @@
         <td>{% if job.printed %}<span class="ok">Yes</span>{% else %}<span class="no">No</span>{% endif %}</td>
         <td>{{ job.expires_at }}</td>
         <td>
-          {# This link will only appear if the job has NOT been printed #}
           {% if not job.printed %}
             <a href="{{ url_for('regenerate_qr', token=job.token) }}" class="btn-qr" target="_blank">Regenerate QR</a>
           {% else %}

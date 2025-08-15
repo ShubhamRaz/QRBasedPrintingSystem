@@ -5,88 +5,199 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Create Account — SmartQRPrint</title>
   <style>
-    :root{
-      --bg:#f6f8fb; --card:#ffffff; --muted:#64707a; --accent:#0b67ff;
-      --danger:#e03e3e; --radius:12px; --gap:12px; --pad:18px;
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    :root {
+      --bg: linear-gradient(135deg, #dbeafe, #f5f7fa);
+      --card: #ffffff;
+      --muted: #64707a;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --danger: #e03e3e;
+      --radius: 12px;
     }
-    html,body{height:100%;margin:0;background:var(--bg);color:#0b1a2b}
-    .wrap{max-width:520px;margin:40px auto;padding:18px}
-    .card{
-      background:var(--card);
-      border-radius:var(--radius);
-      padding:var(--pad);
-      box-shadow:0 8px 30px rgba(10,20,40,0.06);
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      color: #0b1a2b;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
     }
-    h1{font-size:20px;margin:0 0 6px}
-    p.lead{margin:0 0 16px;color:var(--muted);font-size:14px}
-    form {display:grid;gap:10px}
-    label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
-    input[type="text"], input[type="email"], input[type="password"]{
-      width:100%; padding:10px 12px; border-radius:8px; border:1px solid #e6e9ef;
-      outline:none; font-size:15px; box-sizing:border-box;
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.06);
+      max-width: 500px;
+      width: 100%;
+      animation: fadeIn 0.4s ease;
+      position: relative;
     }
-    input:focus{border-color:var(--accent); box-shadow:0 6px 18px rgba(11,103,255,0.06)}
-    .row{display:flex;gap:10px}
-    .btn{background:var(--accent); color:white; border:none; padding:12px 14px; border-radius:10px; cursor:pointer; font-weight:600}
-    .link{background:transparent;border:0;color:var(--accent);cursor:pointer;text-decoration:underline;padding:0}
-    .note{font-size:13px;color:var(--muted)}
-    .flash{padding:10px;border-radius:8px;background:#fff0f0;color:var(--danger);border:1px solid rgba(224,62,62,0.12);margin-bottom:8px}
-    .success{background:#edf8ff;color:#0359a6;border:1px solid rgba(11,103,255,0.08)}
-    .helper{font-size:13px;color:#7a8596}
-    .pw-toggle{background:transparent;border:0;color:var(--muted);cursor:pointer;font-size:13px}
-    @media (max-width:420px){
-      .wrap{margin:18px}
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(8px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+    .home-btn {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      padding: 6px 12px;
+      background: transparent;
+      border: 1px solid #e6e9ef;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .home-btn:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .home-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin: 0 0 6px;
+      text-align: center;
+    }
+    p.lead {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      text-align: center;
+    }
+    form {
+      display: grid;
+      gap: 14px;
+    }
+    label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+      display: block;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #e6e9ef;
+      font-size: 0.95rem;
+      outline: none;
+      background: #f9fafb;
+    }
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+    }
+    .btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+    .btn:hover {
+      background: var(--accent-hover);
+    }
+    .link {
+      color: var(--accent);
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+    .link:hover {
+      text-decoration: underline;
+    }
+    .flash {
+      padding: 10px;
+      border-radius: 8px;
+      background: #ffecec;
+      color: var(--danger);
+      border: 1px solid rgba(224,62,62,0.12);
+      font-size: 0.9rem;
+    }
+    .success {
+      background: #edf8ff;
+      color: #0359a6;
+      border: 1px solid rgba(11,103,255,0.08);
+    }
+    .helper {
+      font-size: 0.8rem;
+      color: #7a8596;
+    }
+    .pw-toggle {
+      background: transparent;
+      border: 0;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.8rem;
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h1>Create account</h1>
-      <p class="lead">Register to upload documents and track your print jobs.</p>
+  <div class="card">
+    <a href="{{ url_for('index') }}" class="home-btn">
+      <svg fill="currentColor" viewBox="0 0 20 20"><path d="M10 2l8 8h-3v8H5v-8H2l8-8z"/></svg>
+      Home
+    </a>
 
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          {% for cat, msg in messages %}
-            <div class="{{ 'flash' if cat=='error' else 'flash success' }}">{{ msg }}</div>
-          {% endfor %}
-        {% endif %}
-      {% endwith %}
+    <h1>Create account</h1>
+    <p class="lead">Register to upload documents and track your print jobs.</p>
 
-      <form id="registerForm" method="post" action="{{ url_for('register') }}" autocomplete="off" novalidate>
-        <div>
-          <label for="username">Username</label>
-          <input id="username" name="username" type="text" required maxlength="150" placeholder="Choose a username" aria-required="true" />
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat, msg in messages %}
+          <div class="{{ 'flash' if cat=='error' else 'flash success' }}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form id="registerForm" method="post" action="{{ url_for('register') }}" autocomplete="off" novalidate>
+      <div>
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" required maxlength="150" placeholder="Choose a username" aria-required="true" />
+      </div>
+
+      <div>
+        <label for="email">Email (optional)</label>
+        <input id="email" name="email" type="email" placeholder="you@example.com" />
+      </div>
+
+      <div>
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" minlength="6" required aria-required="true" placeholder="At least 6 characters" />
+      </div>
+
+      <div>
+        <label for="confirm_password">Confirm password</label>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input id="confirm_password" name="confirm_password" type="password" minlength="6" required placeholder="Repeat password" style="flex:1" />
+          <button type="button" class="pw-toggle" id="togglePw" aria-label="Show password">Show</button>
         </div>
+        <div id="pwMismatch" class="helper" style="color:var(--danger);display:none;margin-top:6px">Passwords do not match.</div>
+      </div>
 
-        <div>
-          <label for="email">Email (optional)</label>
-          <input id="email" name="email" type="email" placeholder="you@example.com" />
-        </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+        <button class="btn" type="submit">Create account</button>
+        <a href="{{ url_for('user_login') }}" class="link">Already have an account?</a>
+      </div>
 
-        <div>
-          <label for="password">Password</label>
-          <input id="password" name="password" type="password" minlength="6" required aria-required="true" placeholder="At least 6 characters" />
-        </div>
-
-        <div>
-          <label for="confirm_password">Confirm password</label>
-          <div style="display:flex; gap:8px; align-items:center;">
-            <input id="confirm_password" name="confirm_password" type="password" minlength="6" required placeholder="Repeat password" style="flex:1" />
-            <button type="button" class="pw-toggle" id="togglePw" aria-label="Show password">Show</button>
-          </div>
-          <div id="pwMismatch" class="helper" style="color:var(--danger);display:none;margin-top:6px">Passwords do not match.</div>
-        </div>
-
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
-          <button class="btn" type="submit">Create account</button>
-          <a href="{{ url_for('user_login') }}" class="link" style="font-size:14px">Already have account?</a>
-        </div>
-
-        <p class="helper" style="margin-top:12px">By creating an account you agree to the service terms. Files are kept temporarily and auto-deleted after printing/expiry.</p>
-      </form>
-    </div>
+      <p class="helper" style="margin-top:8px">By creating an account you agree to the service terms. Files are kept temporarily and auto-deleted after printing/expiry.</p>
+    </form>
   </div>
 
   <script>
@@ -105,7 +216,7 @@
       });
 
       function validatePasswords() {
-        if (pw.value === '' && cpw.value === '') {
+        if (!pw.value && !cpw.value) {
           mismatch.style.display = 'none';
           return true;
         }
@@ -122,25 +233,30 @@
       cpw.addEventListener('input', validatePasswords);
 
       form.addEventListener('submit', function(e){
-        // client-side basic checks
+        // First, check for password mismatch. If they don't match, stop everything.
         if (!validatePasswords()) {
           e.preventDefault();
           cpw.focus();
-          return false;
+          return; // Stop further checks
         }
+
+        // Check if username is empty
         if (!form.username.value.trim()) {
           e.preventDefault();
           alert('Please enter a username.');
           form.username.focus();
-          return false;
+          return; // Stop further checks
         }
+        
+        // --- CODE COMPLETED BELOW ---
+
+        // Check if password is too short
         if (pw.value.length < 6) {
           e.preventDefault();
-          alert('Password must be at least 6 characters.');
+          alert('Password must be at least 6 characters long.');
           pw.focus();
-          return false;
+          return; // Stop further checks
         }
-        // allow submit; server will do final validation
       });
     })();
   </script>

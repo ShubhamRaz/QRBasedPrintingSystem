@@ -6,10 +6,90 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Add User - SmartQRPrint</title>
   <style>
-    body{font-family:Arial,Helvetica,sans-serif;background:#f6f8fb;margin:0;padding:20px}
-    .card{max-width:520px;margin:40px auto;background:#fff;padding:18px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
-    input{width:100%;padding:10px;margin:8px 0;border-radius:6px;border:1px solid #ddd}
-    button{background:#0b67ff;color:#fff;border:none;padding:10px 14px;border-radius:6px;cursor:pointer}
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 420px;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 1.5rem;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    input[type="text"],
+    input[type="password"] {
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      width: 100%;
+    }
+    input:focus {
+      border-color: #3b82f6;
+      outline: none;
+      box-shadow: 0 0 3px rgba(59,130,246,0.4);
+    }
+    label {
+      font-size: 0.95rem;
+      color: #444;
+      margin-bottom: 1rem;
+    }
+    button {
+      padding: 0.75rem;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+    a {
+      color: #3b82f6;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    ul {
+      padding-left: 1rem;
+      margin-bottom: 1rem;
+    }
+    li {
+      list-style: none;
+      background: #ffecec;
+      color: #d8000c;
+      padding: 0.6rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 0.5rem;
+    }
   </style>
 </head>
 <body>
@@ -19,18 +99,18 @@
       {% if messages %}
         <ul>
         {% for cat,msg in messages %}
-          <li style="color:red">{{ msg }}</li>
+          <li>{{ msg }}</li>
         {% endfor %}
         </ul>
       {% endif %}
     {% endwith %}
     <form method="post">
-      <input name="username" placeholder="Username" required>
-      <input name="password" type="password" placeholder="Password" required>
+      <input type="text" name="username" placeholder="Username" required>
+      <input type="password" name="password" placeholder="Password" required>
       <label><input type="checkbox" name="is_admin"> Make admin</label>
-      <div style="margin-top:12px">
+      <div class="actions">
         <button type="submit">Create User</button>
-        <a href="{{ url_for('admin') }}" style="margin-left:10px">Back to Admin</a>
+        <a href="{{ url_for('admin') }}">Back to Admin</a>
       </div>
     </form>
   </div>

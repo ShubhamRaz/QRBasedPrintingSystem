@@ -1,79 +1,206 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Admin Dashboard - SmartQRPrint</title>
-    <style>
-        body { font-family: Arial, Helvetica, sans-serif; background: #f7f9fc; margin: 20px; color: #333; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        th, td { padding: 12px 15px; border: 1px solid #ddd; text-align: left; }
-        th { background: #f2f2f2; font-weight: 600; }
-        .ok { color: green; font-weight: bold; }
-        .no { color: red; font-weight: bold; }
-        .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
-        .top h2 { margin: 0; }
-        .top-nav a { margin-left: 15px; text-decoration: none; color: #0b67ff; font-weight: 600; }
-        td code { background: #eee; padding: 2px 5px; border-radius: 4px; font-family: monospace; }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Dashboard — SmartQRPrint</title>
+  <style>
+    :root {
+      --bg: #f7f9fc;
+      --card: #fff;
+      --accent: #0b67ff;
+      --muted: #333;
+      --radius: 6px;
+      --shadow: rgba(0,0,0,0.1);
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+    }
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--muted);
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .top h2 {
+      font-size: 1.5rem;
+      margin: 0;
+    }
+    nav.top-nav {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.9rem;
+    }
+    nav.top-nav a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      padding: 4px 6px;
+      border-radius: var(--radius);
+      transition: background 0.15s;
+    }
+    nav.top-nav a:hover {
+      background: rgba(11,103,255,0.1);
+    }
+    .admin-label {
+      margin-left: 16px;
+      font-weight: normal;
+      color: var(--muted);
+    }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+    .controls input {
+      flex: 1;
+      padding: 6px 10px;
+      border: 1px solid #ddd;
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      box-shadow: 0 2px 5px var(--shadow);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+      font-size: 0.95rem;
+    }
+    th {
+      background: #f2f2f2;
+      font-weight: 600;
+    }
+    th.sortable {
+      cursor: pointer;
+      position: relative;
+    }
+    th.sortable::after {
+      content: "⇅";
+      font-size: 0.7rem;
+      color: #aaa;
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .ok { color: green; font-weight: bold; }
+    .no { color: red; font-weight: bold; }
+    td code {
+      background: #eee;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+  </style>
 </head>
 <body>
-<div class="container">
+  <div class="container">
     <div class="top">
-        <h2>Admin Dashboard</h2>
-        <div class="top-nav">
-            <span>Admin: <strong>{{ session.user }}</strong></span> |
-            <a href="{{ url_for('admin_add_user') }}">Add User</a> |
-            <a href="{{ url_for('index') }}">Upload Page</a> |
-            <a href="{{ url_for('logout') }}">Logout</a>
-        </div>
+      <h2>Admin Dashboard</h2>
+      <nav class="top-nav">
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('admin_add_user') }}">Add User</a>
+        <a href="{{ url_for('index') }}">Upload Page</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+        <span class="admin-label">Admin: <strong>{{ session.user }}</strong></span>
+      </nav>
+    </div>
+
+    <div class="controls">
+      <label for="searchOwner">Search by owner:</label>
+      <input id="searchOwner" type="text" placeholder="Type username…" />
     </div>
 
     <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Owner</th>
-                <th>File</th>
-                <th>Token</th>
-                <th>Uploaded</th>
-                <th>Paid</th>
-                <th>Printed</th>
-                <th>Expires</th>
-            </tr>
-        </thead>
-        <tbody>
+      <thead>
+        <tr>
+          <th class="sortable">ID</th>
+          <th class="sortable">Owner</th>
+          <th>File</th>
+          <th>Token</th>
+          <th class="sortable">Uploaded</th>
+          <th class="sortable">Paid</th>
+          <th class="sortable">Printed</th>
+          <th class="sortable">Expires</th>
+        </tr>
+      </thead>
+      <tbody>
         {% for job in jobs %}
-            <tr>
-                <td>{{ job.id }}</td>
-                <td><strong>{{ job.owner_username or 'N/A' }}</strong></td>
-                <td>{{ job.filename }}</td>
-                <td><code>{{ job.token }}</code></td>
-                <td>{{ job.uploaded_at }}</td>
-                <td>
-                    {% if job.paid %}
-                        <span class="ok">Yes</span>
-                    {% else %}
-                        <span class="no">No</span>
-                    {% endif %}
-                </td>
-                <td>
-                    {% if job.printed %}
-                        <span class="ok">Yes</span>
-                    {% else %}
-                        <span class="no">No</span>
-                    {% endif %}
-                </td>
-                <td>{{ job.expires_at }}</td>
-            </tr>
+        <tr>
+          <td>{{ job.id }}</td>
+          <td><strong>{{ job.owner_username or 'N/A' }}</strong></td>
+          <td>{{ job.filename }}</td>
+          <td><code>{{ job.token }}</code></td>
+          <td>{{ job.uploaded_at }}</td>
+          <td>{% if job.paid %}<span class="ok">Yes</span>{% else %}<span class="no">No</span>{% endif %}</td>
+          <td>{% if job.printed %}<span class="ok">Yes</span>{% else %}<span class="no">No</span>{% endif %}</td>
+          <td>{{ job.expires_at }}</td>
+        </tr>
         {% else %}
-            <tr>
-                <td colspan="8" style="text-align:center;">No jobs found.</td>
-            </tr>
+        <tr>
+          <td colspan="8" style="text-align:center;">No jobs found.</td>
+        </tr>
         {% endfor %}
-        </tbody>
+      </tbody>
     </table>
-</div>
+  </div>
+
+  <script>
+    (function() {
+      const tbody = document.querySelector('table tbody');
+      let rows = Array.from(tbody.querySelectorAll('tr'));
+
+      document.getElementById('searchOwner').addEventListener('input', e => {
+        const q = e.target.value.toLowerCase();
+        rows.forEach(r => {
+          r.style.display = r.children[1].textContent.toLowerCase().includes(q) 
+            ? '' 
+            : 'none';
+        });
+      });
+
+      document.querySelectorAll('th.sortable').forEach((th, idx) => {
+        let asc = true;
+        th.addEventListener('click', () => {
+          rows.sort((a, b) => {
+            let A = a.children[idx].textContent.trim();
+            let B = b.children[idx].textContent.trim();
+            if (!isNaN(A) && !isNaN(B)) {
+              return asc ? A - B : B - A;
+            }
+            return asc ? A.localeCompare(B) : B.localeCompare(A);
+          });
+          asc = !asc;
+          rows.forEach(r => tbody.appendChild(r));
+        });
+      });
+    })();
+  </script>
 </body>
 </html>

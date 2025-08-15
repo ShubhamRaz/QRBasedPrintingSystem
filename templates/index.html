@@ -5,51 +5,135 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>SmartQRPrint — Upload</title>
   <style>
-    :root{--bg:#f6f8fb;--card:#fff;--muted:#6b7380;--accent:#0b67ff;}
-    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:#0b1a2b}
-    .wrap{max-width:720px;margin:28px auto;padding:16px}
-    .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 8px 30px rgba(10,20,40,0.06)}
-    h1{margin:0 0 6px;font-size:20px}
-    p.lead{margin:0 0 14px;color:var(--muted)}
-    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-    .btn{background:var(--accent);color:#fff;padding:10px 14px;border-radius:10px;border:0;font-weight:600;cursor:pointer}
-    input[type=file]{width:100%;padding:10px 6px}
-    .note{font-size:13px;color:var(--muted);margin-top:10px}
-    .links a{margin-left:12px;color:var(--accent);text-decoration:none}
-    .flash{padding:10px;border-radius:8px;margin-bottom:10px}
-    .flash.error{background:#fff0f0;color:#b02a2a;border:1px solid rgba(224,62,62,0.12)}
-    .flash.success{background:#edf8ff;color:#0359a6;border:1px solid rgba(11,103,255,0.08)}
-    @media (max-width:480px){.wrap{margin:12px}}
+    :root {
+      --bg-gradient: linear-gradient(135deg, #dbeafe, #f5f7fa);
+      --card-bg: #fff;
+      --muted: #6b7380;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--bg-gradient);
+      color: #0b1a2b;
+    }
+    .wrap {
+      max-width: 720px;
+      margin: 40px auto;
+      padding: 16px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffffffcc;
+      backdrop-filter: blur(8px);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .links a {
+      margin-left: 10px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .links a:hover {
+      text-decoration: underline;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      animation: fadeIn 0.4s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+    p.lead {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn:hover {
+      background: var(--accent-hover);
+    }
+    input[type=file] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 0.9rem;
+      background: #f9fafb;
+    }
+    .note {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .flash {
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      font-size: 0.9rem;
+    }
+    .flash.error {
+      background: #ffecec;
+      color: #d8000c;
+    }
+    .flash.success {
+      background: #edf8ff;
+      color: #0359a6;
+    }
+    @media (max-width: 480px) {
+      .wrap { margin: 20px 10px; }
+      .topbar { flex-direction: column; align-items: flex-start; }
+      .links a { margin-left: 0; margin-right: 10px; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="topbar">
-      <div>
-        <strong>SmartQRPrint</strong>
-      </div>
+      <div><strong>SmartQRPrint</strong></div>
       <div class="links">
-{% if session.user %}
-  <span>Hi, <strong>{{ session.user }}</strong></span>
-  <a href="{{ url_for('myjobs') }}">My Jobs</a>
-
-  {# Show admin dashboard link only when session indicates admin #}
-  {% if session.get('is_admin') %}
-    <a href="{{ url_for('admin') }}">Admin</a>
-  {% endif %}
-
-  <a href="{{ url_for('logout') }}">Logout</a>
-{% else %}
-  <a href="{{ url_for('user_login') }}">Login</a>
-  {% if registration_enabled %}
-    <a href="{{ url_for('register') }}">Register</a>
-  {% endif %}
-{% endif %}
+        {% if session.user %}
+          <span>Hi, <strong>{{ session.user }}</strong></span>
+          <a href="{{ url_for('myjobs') }}">My Jobs</a>
+          {% if session.get('is_admin') %}
+            <a href="{{ url_for('admin') }}">Admin</a>
+          {% endif %}
+          <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+          <a href="{{ url_for('user_login') }}">Login</a>
+          {% if registration_enabled %}
+            <a href="{{ url_for('register') }}">Register</a>
+          {% endif %}
+        {% endif %}
       </div>
     </div>
 
     <div class="card">
-      <h1>Upload document</h1>
+      <h1>Upload Document</h1>
       <p class="lead">Upload a PDF or image from your phone or PC. After payment you'll receive a QR to print.</p>
 
       {% with messages = get_flashed_messages(with_categories=true) %}
@@ -64,18 +148,18 @@
         <p class="note">You must <a href="{{ url_for('user_login') }}">log in</a> to upload and track your jobs.</p>
       {% endif %}
 
-      <form method="post" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:10px">
+      <form method="post" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:12px">
         <input type="file" name="file" accept=".pdf,image/*" required {{ 'disabled' if not session.user }}>
-        <div style="display:flex;gap:10px;align-items:center">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
           <button class="btn" type="submit" {{ 'disabled' if not session.user }}>Upload & Get QR</button>
           <span class="note">Max file: {{ max_file_mb }} MB</span>
         </div>
       </form>
 
-      <p class="note">Accepted types: PDF, PNG, JPG. Files are stored temporarily and deleted after printing/expiry.</p>
+      <p class="note" style="margin-top:10px">Accepted types: PDF, PNG, JPG. Files are stored temporarily and deleted after printing/expiry.</p>
     </div>
 
-    <p style="text-align:center;color:var(--muted);font-size:13px;margin-top:8px">
+    <p style="text-align:center;color:var(--muted);font-size:0.8rem;margin-top:12px">
       Need admin tools? <a href="{{ url_for('admin_login') }}">Admin login</a>{% if session.get('is_admin') %}, go to <a href="{{ url_for('admin') }}">Admin</a>{% endif %}.
     </p>
   </div>
