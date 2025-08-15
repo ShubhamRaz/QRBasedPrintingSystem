@@ -131,21 +131,33 @@ def mark_printed_db(token):
 # ---------------------
 # Auth utilities
 # ---------------------
+# ---------------------
+# Auth utilities
+# ---------------------
 def login_required(admin_only=False):
     def decorator(f):
         @wraps(f)
         def wrapped(*args, **kwargs):
             username = session.get("user")
             if not username:
-                return redirect(url_for("login", next=request.path))
+                # send admin-protected pages to admin login, others to user login
+                if admin_only:
+                    return redirect(url_for("admin_login", next=request.path))
+                return redirect(url_for("user_login", next=request.path))
+
+            # if admin_only, prefer session flag but fallback to DB check
             if admin_only:
-                conn = get_db_connection()
-                cur = conn.cursor()
-                cur.execute("SELECT is_admin FROM users WHERE username=?", (username,))
-                row = cur.fetchone()
-                conn.close()
-                if not row or row[0] != 1:
+                if session.get('is_admin') is None:
+                    conn = get_db_connection()
+                    cur = conn.cursor()
+                    cur.execute("SELECT is_admin FROM users WHERE username=?", (username,))
+                    row = cur.fetchone()
+                    conn.close()
+                    session['is_admin'] = bool(row[0]) if row else False
+
+                if not session.get('is_admin'):
                     abort(403)
+
             return f(*args, **kwargs)
         return wrapped
     return decorator
@@ -160,7 +172,7 @@ def index():
         username = session.get('user')
         if not username:
             flash("Please log in to upload files.", "error")
-            return redirect(url_for('login', next=request.path))
+            return redirect(url_for('user_login', next=request.path))
 
         if 'file' not in request.files:
             flash("No file selected.", "error")
@@ -276,35 +288,99 @@ def admin_add_user():
     return render_template('add_user.html')
 
 @app.route('/login', methods=['GET', 'POST'])
-def login():
+def user_login():
+    """
+    Regular user login page. Defaults to redirect to /myjobs after login.
+    """
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
+        next_param = request.form.get('next') or request.args.get('next') or ''
+
         if not username or not password:
             flash("Missing username or password", "error")
-            return redirect(url_for('login'))
+            return redirect(url_for('user_login', next=next_param))
+
         conn = get_db_connection()
         cur = conn.cursor()
-        cur.execute("SELECT password FROM users WHERE username=?", (username,))
+        cur.execute("SELECT password, is_admin FROM users WHERE username=?", (username,))
         row = cur.fetchone()
         conn.close()
+
         if not row:
             flash("Invalid username or password", "error")
-            return redirect(url_for('login'))
-        stored_hash = row[0]
+            return redirect(url_for('user_login', next=next_param))
+
+        stored_hash, is_admin_flag = row[0], bool(row[1])
+
         if check_password_hash(stored_hash, password):
             session['user'] = username
-            next_url = request.args.get('next') or url_for('admin')
-            return redirect(next_url)
+            session['is_admin'] = is_admin_flag
+
+            # Don't send regular users to /admin even if next_param was set
+            if next_param and (not next_param.startswith('/admin') or is_admin_flag):
+                return redirect(next_param)
+            # default landing for regular login: myjobs (admins will land on admin)
+            return redirect(url_for('admin' if is_admin_flag else 'myjobs'))
         else:
             flash("Invalid username or password", "error")
-            return redirect(url_for('login'))
-    return render_template('login.html')
+            return redirect(url_for('user_login', next=next_param))
+
+    # GET
+    return render_template('login.html')  # user login template
+
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    """
+    Admin-only login page. Only accounts with is_admin == 1 may log in here.
+    """
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        next_param = request.form.get('next') or request.args.get('next') or ''
+
+        if not username or not password:
+            flash("Missing username or password", "error")
+            return redirect(url_for('admin_login', next=next_param))
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT password, is_admin FROM users WHERE username=?", (username,))
+        row = cur.fetchone()
+        conn.close()
+
+        if not row:
+            flash("Invalid username or password", "error")
+            return redirect(url_for('admin_login', next=next_param))
+
+        stored_hash, is_admin_flag = row[0], bool(row[1])
+
+        if not is_admin_flag:
+            flash("This account does not have admin access.", "error")
+            return redirect(url_for('admin_login'))
+
+        if check_password_hash(stored_hash, password):
+            session['user'] = username
+            session['is_admin'] = True
+            # If next_param provided and it's inside /admin, redirect there, else default admin dashboard
+            if next_param and next_param.startswith('/admin'):
+                return redirect(next_param)
+            return redirect(url_for('admin'))
+        else:
+            flash("Invalid username or password", "error")
+            return redirect(url_for('admin_login', next=next_param))
+
+    # GET
+    return render_template('admin_login.html')  # separate admin template
+
 
 @app.route('/logout')
 def logout():
     session.pop('user', None)
+    session.pop('is_admin', None)
     return redirect(url_for('index'))
+
 
 # API endpoints for scanner/worker
 @app.route('/file_by_token/<token>', methods=['GET'])
@@ -393,7 +469,8 @@ def register():
             conn.commit()
             conn.close()
             flash("Account created. Please log in.", "success")
-            return redirect(url_for('login'))
+            return redirect(url_for('user_login'))
+
         except sqlite3.IntegrityError:
             flash("Username already exists", "error")
             return redirect(url_for('register'))

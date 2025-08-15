@@ -1,4 +1,3 @@
-<!-- templates/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -33,14 +32,19 @@
 {% if session.user %}
   <span>Hi, <strong>{{ session.user }}</strong></span>
   <a href="{{ url_for('myjobs') }}">My Jobs</a>
+
+  {# Show admin dashboard link only when session indicates admin #}
+  {% if session.get('is_admin') %}
+    <a href="{{ url_for('admin') }}">Admin</a>
+  {% endif %}
+
   <a href="{{ url_for('logout') }}">Logout</a>
 {% else %}
-  <a href="{{ url_for('login') }}">Login</a>
+  <a href="{{ url_for('user_login') }}">Login</a>
   {% if registration_enabled %}
     <a href="{{ url_for('register') }}">Register</a>
   {% endif %}
 {% endif %}
-
       </div>
     </div>
 
@@ -57,7 +61,7 @@
       {% endwith %}
 
       {% if not session.user %}
-        <p class="note">You must <a href="{{ url_for('login') }}">log in</a> to upload and track your jobs.</p>
+        <p class="note">You must <a href="{{ url_for('user_login') }}">log in</a> to upload and track your jobs.</p>
       {% endif %}
 
       <form method="post" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:10px">
@@ -65,7 +69,6 @@
         <div style="display:flex;gap:10px;align-items:center">
           <button class="btn" type="submit" {{ 'disabled' if not session.user }}>Upload & Get QR</button>
           <span class="note">Max file: {{ max_file_mb }} MB</span>
-
         </div>
       </form>
 
@@ -73,7 +76,7 @@
     </div>
 
     <p style="text-align:center;color:var(--muted);font-size:13px;margin-top:8px">
-      Need admin tools? <a href="{{ url_for('login') }}">Login</a> as admin and go to <a href="{{ url_for('admin') }}">Admin</a>.
+      Need admin tools? <a href="{{ url_for('admin_login') }}">Admin login</a>{% if session.get('is_admin') %}, go to <a href="{{ url_for('admin') }}">Admin</a>{% endif %}.
     </p>
   </div>
 </body>

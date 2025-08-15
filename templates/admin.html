@@ -1,79 +1,83 @@
-<!-- templates/admin.html -->
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Admin — SmartQRPrint</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SmartQRPrint — Upload</title>
   <style>
-    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:#f5f7fb;color:#082033;margin:0;padding:18px}
-    .wrap{max-width:1100px;margin:12px auto}
-    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-    h1{margin:0;font-size:20px}
-    .controls a{margin-left:12px;color:#0b67ff;text-decoration:none}
-    table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 8px 24px rgba(12,22,40,0.06)}
-    th,td{padding:10px 12px;border-bottom:1px solid #eef2f6;text-align:left}
-    th{background:#f8fafc}
-    tr:last-child td{border-bottom:0}
-    .ok{color:green;font-weight:600}
-    .no{color:#c0392b;font-weight:600}
-    .small{font-size:13px;color:#6b7380}
-    .top-actions{margin-bottom:10px;display:flex;gap:10px}
-    .btn{background:#0b67ff;color:#fff;padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
-    .link{background:transparent;border:0;color:#0b67ff;cursor:pointer;text-decoration:underline}
-    @media (max-width:900px){table{font-size:13px}}
+    :root{--bg:#f6f8fb;--card:#fff;--muted:#6b7380;--accent:#0b67ff;}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:#0b1a2b}
+    .wrap{max-width:720px;margin:28px auto;padding:16px}
+    .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 8px 30px rgba(10,20,40,0.06)}
+    h1{margin:0 0 6px;font-size:20px}
+    p.lead{margin:0 0 14px;color:var(--muted)}
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .btn{background:var(--accent);color:#fff;padding:10px 14px;border-radius:10px;border:0;font-weight:600;cursor:pointer}
+    input[type=file]{width:100%;padding:10px 6px}
+    .note{font-size:13px;color:var(--muted);margin-top:10px}
+    .links a{margin-left:12px;color:var(--accent);text-decoration:none}
+    .flash{padding:10px;border-radius:8px;margin-bottom:10px}
+    .flash.error{background:#fff0f0;color:#b02a2a;border:1px solid rgba(224,62,62,0.12)}
+    .flash.success{background:#edf8ff;color:#0359a6;border:1px solid rgba(11,103,255,0.08)}
+    @media (max-width:480px){.wrap{margin:12px}}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <header>
+    <div class="topbar">
       <div>
-        <h1>Admin Dashboard</h1>
-        <div class="small">Logged in as <strong>{{ session.user }}</strong></div>
+        <strong>SmartQRPrint</strong>
       </div>
-      <div class="controls">
-        <a href="{{ url_for('admin_add_user') }}" class="btn">Add User</a>
-        <a href="{{ url_for('index') }}" class="link">Upload Page</a>
-        <a href="{{ url_for('logout') }}" class="link">Logout</a>
-      </div>
-    </header>
+      <div class="links">
+{% if session.get('user') %}
+  <span>Hi, <strong>{{ session.get('user') }}</strong></span>
+  <a href="{{ url_for('myjobs') }}">My Jobs</a>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for cat,msg in messages %}
-          <div style="padding:10px;border-radius:8px;margin-bottom:10px" class="{{ 'small' }}"><strong>{{ msg }}</strong></div>
-        {% endfor %}
+  {# Show admin dashboard link only when session indicates admin #}
+  {% if session.get('is_admin') %}
+    <a href="{{ url_for('admin') }}">Admin</a>
+  {% endif %}
+
+  <a href="{{ url_for('logout') }}">Logout</a>
+{% else %}
+  <a href="{{ url_for('user_login') }}">Login</a>
+  {% if registration_enabled %}
+    <a href="{{ url_for('register') }}">Register</a>
+  {% endif %}
+{% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <h1>Upload document</h1>
+      <p class="lead">Upload a PDF or image from your phone or PC. After payment you'll receive a QR to print.</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for cat,msg in messages %}
+            <div class="flash {{ 'error' if cat=='error' else 'success' }}">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      {% if not session.get('user') %}
+        <p class="note">You must <a href="{{ url_for('user_login') }}">log in</a> to upload and track your jobs.</p>
       {% endif %}
-    {% endwith %}
 
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Token</th>
-          <th>Filename</th>
-          <th>Uploaded</th>
-          <th>Paid</th>
-          <th>Printed</th>
-          <th>Expires</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for job in jobs %}
-        <tr>
-          <td>{{ job.id }}</td>
-          <td><code>{{ job.token }}</code></td>
-          <td>{{ job.filename }}</td>
-          <td>{{ job.uploaded_at }}</td>
-          <td>{% if job.paid %}<span class="ok">Yes{% else %}<span class="no">No{% endif %}</span></td>
-          <td>{% if job.printed %}<span class="ok">Yes{% else %}<span class="no">No{% endif %}</span></td>
-          <td>{{ job.expires_at }}</td>
-        </tr>
-        {% else %}
-        <tr><td colspan="7" style="text-align:center;padding:20px">No jobs yet</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+      <form method="post" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:10px">
+        <input type="file" name="file" accept=".pdf,image/*" required {{ 'disabled' if not session.get('user') }}>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button class="btn" type="submit" {{ 'disabled' if not session.get('user') }}>Upload & Get QR</button>
+          <span class="note">Max file: {{ max_file_mb }} MB</span>
+        </div>
+      </form>
+
+      <p class="note">Accepted types: PDF, PNG, JPG. Files are stored temporarily and deleted after printing/expiry.</p>
+    </div>
+
+    <p style="text-align:center;color:var(--muted);font-size:13px;margin-top:8px">
+      Need admin tools? <a href="{{ url_for('admin_login') }}">Admin login</a>{% if session.get('is_admin') %}, go to <a href="{{ url_for('admin') }}">Admin</a>{% endif %}.
+    </p>
   </div>
 </body>
 </html>
