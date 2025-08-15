@@ -238,25 +238,36 @@ def index():
     registration_enabled = 'register' in app.view_functions
     return render_template('index.html', registration_enabled=registration_enabled)
 
+# In your app.py
+
+from datetime import datetime # Make sure this is imported at the top of your file
+
 @app.route('/admin')
 @login_required(admin_only=True)
 def admin():
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute('SELECT id, token, filename, uploaded_at, paid, printed, expires_at FROM jobs ORDER BY uploaded_at DESC')
+    # Step 1: Add 'owner_username' to the SELECT statement
+    cur.execute(
+        'SELECT id, token, filename, owner_username, uploaded_at, paid, printed, expires_at FROM jobs ORDER BY uploaded_at DESC'
+    )
     rows = cur.fetchall()
     conn.close()
+    
     formatted = []
     for r in rows:
         formatted.append({
             'id': r[0],
             'token': r[1],
             'filename': r[2],
-            'uploaded_at': datetime.fromtimestamp(r[3]).strftime("%Y-%m-%d %H:%M:%S"),
-            'paid': bool(r[4]),
-            'printed': bool(r[5]),
-            'expires_at': datetime.fromtimestamp(r[6]).strftime("%Y-%m-%d %H:%M:%S"),
+            # Step 2: Add the owner's username to the dictionary
+            'owner_username': r[3], 
+            'uploaded_at': datetime.fromtimestamp(r[4]).strftime("%Y-%m-%d %H:%M:%S"),
+            'paid': bool(r[5]),
+            'printed': bool(r[6]),
+            'expires_at': datetime.fromtimestamp(r[7]).strftime("%Y-%m-%d %H:%M:%S"),
         })
+        
     return render_template('admin.html', jobs=formatted)
 
 @app.route('/admin/add_user', methods=['GET', 'POST'])
@@ -449,6 +460,36 @@ def myjobs():
             'expires_at': datetime.fromtimestamp(r[6]).strftime("%Y-%m-%d %H:%M:%S"),
         })
     return render_template('myjobs.html', jobs=formatted)
+@app.route('/regenerate_qr/<token>')
+@login_required()
+def regenerate_qr(token):
+    username = session.get('user')
+    conn = get_db_connection()
+
+    # Check that the job exists and belongs to this user
+    job = conn.execute(
+        'SELECT owner_username, printed FROM jobs WHERE token = ?', (token,)
+    ).fetchone()
+    conn.close()
+
+    if not job or job['owner_username'] != username:
+        abort(404)
+
+    if job['printed']:
+        flash("This job has already been printed.", "error")
+        return redirect(url_for('myjobs'))
+
+    # Generate QR code
+    qr = qrcode.QRCode(box_size=6, border=2)
+    qr.add_data(token)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+
+    buf = BytesIO()
+    img.save(buf, format='PNG')
+    buf.seek(0)
+
+    return send_file(buf, mimetype='image/png')
 
 # Registration route for new users
 
@@ -475,6 +516,7 @@ def register():
             flash("Username already exists", "error")
             return redirect(url_for('register'))
     return render_template('register.html')
+
 
 # ---------------------
 # Run app

@@ -11,6 +11,7 @@
     th{background:#f0f0f0}
     .ok{color:green}.no{color:red}
     .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .btn-qr{padding:5px 10px;background:#0b67ff;color:#fff;text-decoration:none;border-radius:5px;font-size:14px}
   </style>
 </head>
 <body>
@@ -24,26 +25,39 @@
   </div>
 
   <table>
-    <tr>
-      <th>ID</th>
-      <th>Token</th>
-      <th>File</th>
-      <th>Uploaded</th>
-      <th>Paid</th>
-      <th>Printed</th>
-      <th>Expires</th>
-    </tr>
-    {% for job in jobs %}
-    <tr>
-      <td>{{ job.id }}</td>
-      <td>{{ job.token }}</td>
-      <td>{{ job.filename }}</td>
-      <td>{{ job.uploaded_at }}</td>
-      <td>{% if job.paid %}<span class="ok">Yes{% else %}<span class="no">No{% endif %}</span></td>
-      <td>{% if job.printed %}<span class="ok">Yes{% else %}<span class="no">No{% endif %}</span></td>
-      <td>{{ job.expires_at }}</td>
-    </tr>
-    {% endfor %}
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Token</th>
+        <th>File</th>
+        <th>Uploaded</th>
+        <th>Paid</th>
+        <th>Printed</th>
+        <th>Expires</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for job in jobs %}
+      <tr>
+        <td>{{ job.id }}</td>
+        <td><code>{{ job.token }}</code></td>
+        <td>{{ job.filename }}</td>
+        <td>{{ job.uploaded_at }}</td>
+        <td>{% if job.paid %}<span class="ok">Yes</span>{% else %}<span class="no">No</span>{% endif %}</td>
+        <td>{% if job.printed %}<span class="ok">Yes</span>{% else %}<span class="no">No</span>{% endif %}</td>
+        <td>{{ job.expires_at }}</td>
+        <td>
+          {# This link will only appear if the job has NOT been printed #}
+          {% if not job.printed %}
+            <a href="{{ url_for('regenerate_qr', token=job.token) }}" class="btn-qr" target="_blank">Regenerate QR</a>
+          {% else %}
+            <span>-</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
   </table>
 </body>
 </html>
