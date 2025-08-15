@@ -1,32 +1,79 @@
 <!-- templates/admin.html -->
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>SmartQRPrint — Admin</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Admin — SmartQRPrint</title>
   <style>
-    body { font-family: Arial, sans-serif; margin:20px; background:#fafafa }
-    table { border-collapse: collapse; width:100% }
-    th, td { padding:8px 10px; border:1px solid #ddd }
-    th { background:#f0f0f0 }
-    .ok { color:green } .no { color:red }
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:#f5f7fb;color:#082033;margin:0;padding:18px}
+    .wrap{max-width:1100px;margin:12px auto}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    h1{margin:0;font-size:20px}
+    .controls a{margin-left:12px;color:#0b67ff;text-decoration:none}
+    table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 8px 24px rgba(12,22,40,0.06)}
+    th,td{padding:10px 12px;border-bottom:1px solid #eef2f6;text-align:left}
+    th{background:#f8fafc}
+    tr:last-child td{border-bottom:0}
+    .ok{color:green;font-weight:600}
+    .no{color:#c0392b;font-weight:600}
+    .small{font-size:13px;color:#6b7380}
+    .top-actions{margin-bottom:10px;display:flex;gap:10px}
+    .btn{background:#0b67ff;color:#fff;padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
+    .link{background:transparent;border:0;color:#0b67ff;cursor:pointer;text-decoration:underline}
+    @media (max-width:900px){table{font-size:13px}}
   </style>
 </head>
 <body>
-  <h2>Jobs</h2>
-  <table>
-    <tr><th>ID</th><th>Token</th><th>File</th><th>Uploaded</th><th>Paid</th><th>Printed</th><th>Expires</th></tr>
-    {% for job in jobs %}
-    <tr>
-      <td>{{ job.id }}</td>
-      <td>{{ job.token }}</td>
-      <td>{{ job.filename }}</td>
-      <td>{{ job.uploaded_at }}</td>
-      <td>{% if job.paid %}<span class="ok">Yes{% else %}<span class="no">No{% endif %}</span></td>
-      <td>{% if job.printed %}<span class="ok">Yes{% else %}<span class="no">No{% endif %}</span></td>
-      <td>{{ job.expires_at }}</td>
-    </tr>
-    {% endfor %}
-  </table>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Admin Dashboard</h1>
+        <div class="small">Logged in as <strong>{{ session.user }}</strong></div>
+      </div>
+      <div class="controls">
+        <a href="{{ url_for('admin_add_user') }}" class="btn">Add User</a>
+        <a href="{{ url_for('index') }}" class="link">Upload Page</a>
+        <a href="{{ url_for('logout') }}" class="link">Logout</a>
+      </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat,msg in messages %}
+          <div style="padding:10px;border-radius:8px;margin-bottom:10px" class="{{ 'small' }}"><strong>{{ msg }}</strong></div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Token</th>
+          <th>Filename</th>
+          <th>Uploaded</th>
+          <th>Paid</th>
+          <th>Printed</th>
+          <th>Expires</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for job in jobs %}
+        <tr>
+          <td>{{ job.id }}</td>
+          <td><code>{{ job.token }}</code></td>
+          <td>{{ job.filename }}</td>
+          <td>{{ job.uploaded_at }}</td>
+          <td>{% if job.paid %}<span class="ok">Yes{% else %}<span class="no">No{% endif %}</span></td>
+          <td>{% if job.printed %}<span class="ok">Yes{% else %}<span class="no">No{% endif %}</span></td>
+          <td>{{ job.expires_at }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" style="text-align:center;padding:20px">No jobs yet</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </body>
 </html>

@@ -1,0 +1,149 @@
+<!-- templates/register.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Create Account — SmartQRPrint</title>
+  <style>
+    :root{
+      --bg:#f6f8fb; --card:#ffffff; --muted:#64707a; --accent:#0b67ff;
+      --danger:#e03e3e; --radius:12px; --gap:12px; --pad:18px;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    html,body{height:100%;margin:0;background:var(--bg);color:#0b1a2b}
+    .wrap{max-width:520px;margin:40px auto;padding:18px}
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:var(--pad);
+      box-shadow:0 8px 30px rgba(10,20,40,0.06);
+    }
+    h1{font-size:20px;margin:0 0 6px}
+    p.lead{margin:0 0 16px;color:var(--muted);font-size:14px}
+    form {display:grid;gap:10px}
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
+    input[type="text"], input[type="email"], input[type="password"]{
+      width:100%; padding:10px 12px; border-radius:8px; border:1px solid #e6e9ef;
+      outline:none; font-size:15px; box-sizing:border-box;
+    }
+    input:focus{border-color:var(--accent); box-shadow:0 6px 18px rgba(11,103,255,0.06)}
+    .row{display:flex;gap:10px}
+    .btn{background:var(--accent); color:white; border:none; padding:12px 14px; border-radius:10px; cursor:pointer; font-weight:600}
+    .link{background:transparent;border:0;color:var(--accent);cursor:pointer;text-decoration:underline;padding:0}
+    .note{font-size:13px;color:var(--muted)}
+    .flash{padding:10px;border-radius:8px;background:#fff0f0;color:var(--danger);border:1px solid rgba(224,62,62,0.12);margin-bottom:8px}
+    .success{background:#edf8ff;color:#0359a6;border:1px solid rgba(11,103,255,0.08)}
+    .helper{font-size:13px;color:#7a8596}
+    .pw-toggle{background:transparent;border:0;color:var(--muted);cursor:pointer;font-size:13px}
+    @media (max-width:420px){
+      .wrap{margin:18px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Create account</h1>
+      <p class="lead">Register to upload documents and track your print jobs.</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for cat, msg in messages %}
+            <div class="{{ 'flash' if cat=='error' else 'flash success' }}">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form id="registerForm" method="post" action="{{ url_for('register') }}" autocomplete="off" novalidate>
+        <div>
+          <label for="username">Username</label>
+          <input id="username" name="username" type="text" required maxlength="150" placeholder="Choose a username" aria-required="true" />
+        </div>
+
+        <div>
+          <label for="email">Email (optional)</label>
+          <input id="email" name="email" type="email" placeholder="you@example.com" />
+        </div>
+
+        <div>
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" minlength="6" required aria-required="true" placeholder="At least 6 characters" />
+        </div>
+
+        <div>
+          <label for="confirm_password">Confirm password</label>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <input id="confirm_password" name="confirm_password" type="password" minlength="6" required placeholder="Repeat password" style="flex:1" />
+            <button type="button" class="pw-toggle" id="togglePw" aria-label="Show password">Show</button>
+          </div>
+          <div id="pwMismatch" class="helper" style="color:var(--danger);display:none;margin-top:6px">Passwords do not match.</div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+          <button class="btn" type="submit">Create account</button>
+          <a href="{{ url_for('login') }}" class="link" style="font-size:14px">Already have account?</a>
+        </div>
+
+        <p class="helper" style="margin-top:12px">By creating an account you agree to the service terms. Files are kept temporarily and auto-deleted after printing/expiry.</p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const form = document.getElementById('registerForm');
+      const pw = document.getElementById('password');
+      const cpw = document.getElementById('confirm_password');
+      const mismatch = document.getElementById('pwMismatch');
+      const toggle = document.getElementById('togglePw');
+
+      toggle.addEventListener('click', () => {
+        const show = pw.type === 'password';
+        pw.type = cpw.type = show ? 'text' : 'password';
+        toggle.textContent = show ? 'Hide' : 'Show';
+        toggle.setAttribute('aria-pressed', show ? 'true' : 'false');
+      });
+
+      function validatePasswords() {
+        if (pw.value === '' && cpw.value === '') {
+          mismatch.style.display = 'none';
+          return true;
+        }
+        if (pw.value !== cpw.value) {
+          mismatch.style.display = 'block';
+          return false;
+        } else {
+          mismatch.style.display = 'none';
+          return true;
+        }
+      }
+
+      pw.addEventListener('input', validatePasswords);
+      cpw.addEventListener('input', validatePasswords);
+
+      form.addEventListener('submit', function(e){
+        // client-side basic checks
+        if (!validatePasswords()) {
+          e.preventDefault();
+          cpw.focus();
+          return false;
+        }
+        if (!form.username.value.trim()) {
+          e.preventDefault();
+          alert('Please enter a username.');
+          form.username.focus();
+          return false;
+        }
+        if (pw.value.length < 6) {
+          e.preventDefault();
+          alert('Password must be at least 6 characters.');
+          pw.focus();
+          return false;
+        }
+        // allow submit; server will do final validation
+      });
+    })();
+  </script>
+</body>
+</html>
