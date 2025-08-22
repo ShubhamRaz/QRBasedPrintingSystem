@@ -1,4 +1,4 @@
-# Smart QR-Based Printing System
+# Smart QR-Based Printing System (Under Development)
 
 A **Raspberry Pi Zero 2 W–powered** document printing system where users can upload documents via a web interface, pay, and receive a QR code.  
 Later, they scan the QR code at the printer station to automatically print their document.  
